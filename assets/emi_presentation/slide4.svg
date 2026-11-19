@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060c18"/>
+      <stop offset="50%" stop-color="#0a1428"/>
+      <stop offset="100%" stop-color="#050812"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#0077ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  
+  <rect x="80" y="60" width="1440" height="4" fill="url(#accent)"/>
+  <text x="80" y="115" font-family="'Space Grotesk', sans-serif" font-size="22" fill="#00d4ff" font-weight="bold" letter-spacing="3">ELECTROMAGNETIC THEORY &amp; INTERFERENCE · SLIDE 4 OF 5</text>
+  <text x="80" y="185" font-family="'Space Grotesk', sans-serif" font-size="60" fill="#ffffff" font-weight="800">Types of EMI by Travel Path</text>
+  <text x="890" y="185" font-family="'Space Grotesk', sans-serif" font-size="30" fill="#94a3b8" font-weight="500">— Coupling Mechanisms</text>
+
+  <!-- Conducted EMI -->
+  <rect x="80" y="240" width="700" height="500" rx="20" fill="rgba(13,22,40,0.8)" stroke="rgba(56,189,248,0.3)" stroke-width="2"/>
+  <rect x="120" y="280" width="80" height="80" rx="16" fill="rgba(56,189,248,0.15)" stroke="#38bdf8" stroke-width="2"/>
+  <path d="M150 305 L150 325 M170 305 L170 325 M140 325 L180 325 L180 345 L140 345 Z" fill="none" stroke="#38bdf8" stroke-width="3"/>
+  <text x="230" y="325" font-family="'Space Grotesk', sans-serif" font-size="34" fill="#ffffff" font-weight="700">Conducted EMI</text>
+  <text x="230" y="358" font-family="'Inter', sans-serif" font-size="18" fill="#38bdf8">Conductors &amp; Physical Wiring</text>
+  
+  <rect x="120" y="390" width="620" height="150" rx="12" fill="rgba(6,11,23,0.7)"/>
+  <text x="145" y="435" font-family="'Inter', sans-serif" font-size="22" fill="#f1f5f9" font-weight="600">• Travels through wires, PCB traces, or metal paths.</text>
+  <text x="145" y="475" font-family="'Inter', sans-serif" font-size="20" fill="#cbd5e1">• Unwanted voltage or current propagates directly through common conductors.</text>
+
+  <rect x="120" y="565" width="620" height="145" rx="12" fill="rgba(6,11,23,0.7)"/>
+  <text x="145" y="605" font-family="'Inter', sans-serif" font-size="19" fill="#00d4ff" font-weight="600">Real-World Example:</text>
+  <text x="145" y="645" font-family="'Inter', sans-serif" font-size="20" fill="#cbd5e1">A device's power cord puts switching noise onto the common power grid; other connected devices get disturbed.</text>
+
+  <!-- Radiated EMI -->
+  <rect x="820" y="240" width="700" height="500" rx="20" fill="rgba(13,22,40,0.8)" stroke="rgba(0,212,255,0.3)" stroke-width="2"/>
+  <rect x="860" y="280" width="80" height="80" rx="16" fill="rgba(0,212,255,0.15)" stroke="#00d4ff" stroke-width="2"/>
+  <path d="M890 335 A 15 15 0 0 1 910 335 M885 325 A 25 25 0 0 1 915 325 M880 315 A 35 35 0 0 1 920 315" stroke="#00d4ff" stroke-width="3" fill="none"/>
+  <circle cx="900" cy="342" r="4" fill="#00d4ff"/>
+  <text x="970" y="325" font-family="'Space Grotesk', sans-serif" font-size="34" fill="#ffffff" font-weight="700">Radiated EMI</text>
+  <text x="970" y="358" font-family="'Inter', sans-serif" font-size="18" fill="#00d4ff">Free Space / Air Propagation</text>
+
+  <rect x="860" y="390" width="620" height="150" rx="12" fill="rgba(6,11,23,0.7)"/>
+  <text x="885" y="435" font-family="'Inter', sans-serif" font-size="22" fill="#f1f5f9" font-weight="600">• Unwanted electric or magnetic fields travel through air.</text>
+  <text x="885" y="475" font-family="'Inter', sans-serif" font-size="20" fill="#cbd5e1">• A device acts as an inadvertent antenna without meaning to.</text>
+
+  <rect x="860" y="565" width="620" height="145" rx="12" fill="rgba(6,11,23,0.7)"/>
+  <text x="885" y="605" font-family="'Inter', sans-serif" font-size="19" fill="#00d4ff" font-weight="600">Real-World Example:</text>
+  <text x="885" y="645" font-family="'Inter', sans-serif" font-size="20" fill="#cbd5e1">Fast digital switching radiates RF energy through the air; nearby radio receivers pick up the buzz and get distorted.</text>
+
+  <!-- Footer -->
+  <rect x="80" y="765" width="1440" height="70" rx="12" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+  <text x="800" y="808" font-family="'Space Grotesk', sans-serif" font-size="22" fill="#38bdf8" font-weight="600" text-anchor="middle">
+    ★ RULE: Conducted noise is tackled with Filters; Radiated noise is tackled with Shields.
+  </text>
+</svg>

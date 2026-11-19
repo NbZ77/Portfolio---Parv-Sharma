@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060c18"/>
+      <stop offset="50%" stop-color="#0a1428"/>
+      <stop offset="100%" stop-color="#050812"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#0077ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  
+  <rect x="80" y="60" width="1440" height="4" fill="url(#accent)"/>
+  <text x="80" y="115" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="22" fill="#00d4ff" font-weight="bold" letter-spacing="3">ELECTROMAGNETIC THEORY &amp; INTERFERENCE · MODULE 3</text>
+  <text x="80" y="185" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="60" fill="#ffffff" font-weight="800">What is EMI?</text>
+  <text x="520" y="185" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="34" fill="#94a3b8" font-weight="500">— Electromagnetic Interference</text>
+
+  <!-- Definition -->
+  <rect x="80" y="230" width="1440" height="150" rx="16" fill="rgba(13,22,40,0.85)" stroke="rgba(56,189,248,0.25)" stroke-width="1.5"/>
+  <text x="120" y="285" font-family="'Inter', sans-serif" font-size="26" fill="#f1f5f9" font-weight="600">EMI is the problem that happens when unwanted voltages or currents disturb the working of a device.</text>
+  <text x="120" y="340" font-family="'Inter', sans-serif" font-size="22" fill="#94a3b8">Noise is the unwanted signal. When noise makes a circuit work wrongly, it becomes <tspan fill="#00d4ff" font-weight="bold">interference</tspan>.</text>
+
+  <!-- Emitter -->
+  <rect x="80" y="420" width="700" height="310" rx="20" fill="rgba(13,22,40,0.75)" stroke="rgba(0,212,255,0.3)" stroke-width="2"/>
+  <circle cx="160" cy="505" r="45" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2"/>
+  <path d="M160 480 L145 510 L160 510 L155 530 L175 500 L160 500 Z" fill="#00d4ff"/>
+  <text x="230" y="505" font-family="'Space Grotesk', sans-serif" font-size="36" fill="#ffffff" font-weight="700">Emitter</text>
+  <text x="230" y="540" font-family="'Inter', sans-serif" font-size="20" fill="#38bdf8">The Source of Noise</text>
+  <text x="120" y="615" font-family="'Inter', sans-serif" font-size="22" fill="#cbd5e1">• The source of EMI. Any electronic device can be one.</text>
+  <text x="120" y="660" font-family="'Inter', sans-serif" font-size="22" fill="#94a3b8">• Emits unintentional fields or electrical transients.</text>
+
+  <!-- Susceptor -->
+  <rect x="820" y="420" width="700" height="310" rx="20" fill="rgba(13,22,40,0.75)" stroke="rgba(245,158,11,0.3)" stroke-width="2"/>
+  <circle cx="900" cy="505" r="45" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2"/>
+  <path d="M900 480 L925 525 L875 525 Z" fill="none" stroke="#f59e0b" stroke-width="3"/>
+  <line x1="900" y1="495" x2="900" y2="512" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="900" cy="519" r="2.5" fill="#f59e0b"/>
+  <text x="970" y="505" font-family="'Space Grotesk', sans-serif" font-size="36" fill="#ffffff" font-weight="700">Susceptor</text>
+  <text x="970" y="540" font-family="'Inter', sans-serif" font-size="20" fill="#fbbf24">The Victim Device</text>
+  <text x="860" y="615" font-family="'Inter', sans-serif" font-size="22" fill="#cbd5e1">• The victim device that gets disturbed by the noise.</text>
+  <text x="860" y="660" font-family="'Inter', sans-serif" font-size="22" fill="#94a3b8">• Malfunctions or loses precision under interference.</text>
+
+  <!-- Footer -->
+  <rect x="80" y="765" width="1440" height="70" rx="12" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+  <text x="800" y="808" font-family="'Space Grotesk', sans-serif" font-size="22" fill="#38bdf8" font-weight="600" text-anchor="middle">
+    ★ CORE PRINCIPLE: Noise cannot be removed, but interference can.
+  </text>
+</svg>

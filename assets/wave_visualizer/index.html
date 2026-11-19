@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EM Wave Visualizer</title>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+:root {
+  --bg:#080d19;
+  --panel:#111a2b;
+  --border:#27344b;
+  --text:#edf4ff;
+  --muted:#9eacc4;
+  --electric:#42d9ff;
+  --magnetic:#ffad61;
+  --wave:#a09aff;
+  --power:#66f0a5;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",Arial,sans-serif;
+}
+button,input,select { font:inherit; }
+.app { max-width:1550px; margin:auto; padding:24px; }
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.eyebrow {
+  color:var(--electric);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:2px;
+}
+h1 {
+  margin:8px 0;
+  font-size:clamp(27px,4vw,39px);
+  letter-spacing:-1px;
+}
+.subtitle { color:var(--muted); font-size:14px; line-height:1.6; }
+.status {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  padding:11px 15px;
+  border-radius:30px;
+  font-size:12px;
+}
+.status-dot {
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#49e59b;
+  box-shadow:0 0 12px #49e59b88;
+}
+.layout {
+  display:grid;
+  grid-template-columns:minmax(0,1.7fr) minmax(300px,.85fr);
+  gap:18px;
+  align-items:start;
+}
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  min-width:0;
+}
+.panel-heading {
+  padding:17px 19px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.panel-heading h2,.info h2 { font-size:14px; margin:0; }
+.panel-heading p { color:var(--muted); font-size:11px; margin:5px 0 0; }
+.badge {
+  font-size:10px;
+  letter-spacing:1px;
+  padding:6px 9px;
+  border-radius:6px;
+  background:#242447;
+  border:1px solid #41416c;
+  color:#c6c6ff;
+  white-space:nowrap;
+}
+#scene { height:470px; position:relative; background:#0b1220; }
+#scene canvas { display:block; width:100%; height:100%; }
+.scene-hint {
+  position:absolute;
+  left:13px;
+  bottom:12px;
+  font-size:11px;
+  color:#b6c5dc;
+  background:#080d19c9;
+  padding:8px 10px;
+  border-radius:6px;
+  pointer-events:none;
+}
+.legend {
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  padding:15px 18px;
+  border-top:1px solid var(--border);
+}
+.legend-item {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:12px;
+  color:#cbd6e9;
+}
+.legend-line { width:20px; height:3px; border-radius:4px; }
+.controls { padding:19px; }
+.control-group { margin-bottom:22px; }
+.control-title {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:12px;
+}
+.control-title label { font-size:12px; font-weight:650; }
+.value {
+  font-size:12px;
+  color:var(--electric);
+  font-variant-numeric:tabular-nums;
+}
+input[type=range] { width:100%; accent-color:var(--electric); cursor:pointer; }
+input:disabled { opacity:.4; cursor:not-allowed; }
+.range-ends {
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  color:#8292ad;
+  margin-top:5px;
+}
+select {
+  width:100%;
+  min-width:0;
+  padding:11px;
+  color:var(--text);
+  background:#0b1424;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.select-label {
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+.direction-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:17px;
+}
+.divider { height:1px; background:var(--border); margin:20px 0; }
+.buttons { display:flex; gap:9px; margin-top:22px; }
+button {
+  cursor:pointer;
+  min-height:44px;
+  padding:10px 13px;
+  border-radius:8px;
+  color:var(--text);
+  border:1px solid var(--border);
+  background:#1b2940;
+}
+button:hover { background:#273a57; }
+button.primary { flex:1; background:#383c80; border-color:#5559a8; }
+#message {
+  min-height:18px;
+  font-size:11px;
+  color:#d5d1ff;
+  line-height:1.5;
+  margin-top:10px;
+}
+.mode-box {
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:13px;
+  margin-bottom:20px;
+  background:#0b1424;
+}
+.mode-box label { font-size:12px; font-weight:650; }
+.mode-box p { margin:7px 0 0; color:var(--muted); font-size:11px; line-height:1.6; }
+.mode-row { display:flex; align-items:center; gap:10px; }
+.mode-row input { accent-color:var(--electric); width:17px; height:17px; }
+.metrics {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-top:18px;
+}
+.metric {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:15px;
+  min-width:0;
+}
+.metric-label {
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.metric-value {
+  font-size:clamp(17px,2vw,24px);
+  font-weight:750;
+  margin:9px 0 5px;
+  overflow-wrap:anywhere;
+  font-variant-numeric:tabular-nums;
+}
+.metric-unit { font-size:11px; color:var(--muted); }
+.lower-grid {
+  display:grid;
+  grid-template-columns:1.15fr 1fr;
+  gap:18px;
+  margin-top:18px;
+}
+.info { padding:20px; }
+.info h2 { margin-bottom:16px; }
+.equation {
+  background:#0b1424;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:12px;
+  margin-bottom:9px;
+  font-family:Cambria,"Times New Roman",serif;
+  font-size:16px;
+  overflow-wrap:anywhere;
+}
+.equation small {
+  display:block;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:var(--muted);
+  font-size:10px;
+  margin-bottom:6px;
+}
+.note { color:var(--muted); font-size:12px; line-height:1.8; }
+#directionSummary { color:#d8e5ff; font-size:12px; line-height:1.9; }
+footer {
+  text-align:center;
+  color:#7888a2;
+  font-size:11px;
+  padding:25px 0 5px;
+  line-height:1.8;
+}
+@media(max-width:900px) {
+  .layout,.lower-grid { grid-template-columns:1fr; }
+  #scene { height:400px; }
+}
+@media(max-width:550px) {
+  .app { padding:12px; }
+  #scene { height:340px; }
+  .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .direction-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div>
+    <div class="eyebrow">ELECTROMAGNETIC THEORY · INTERACTIVE LAB</div>
+    <h1>EM Wave Visualizer</h1>
+    <div class="subtitle">Explore electromagnetic fields and the direction of energy flow.</div>
+  </div>
+  <div class="status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">ANIMATION RUNNING</span>
+  </div>
+</header>
+
+<div class="layout">
+
+<section class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>Three-dimensional wave</h2>
+      <p>Drag to rotate · Scroll to zoom</p>
+    </div>
+    <span class="badge">FREE SPACE MODEL</span>
+  </div>
+
+  <div id="scene">
+    <div class="scene-hint">E: cyan · B: orange · S: green · Propagation: violet</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-line" style="background:#42d9ff"></span>Electric field E</div>
+    <div class="legend-item"><span class="legend-line" style="background:#ffad61"></span>Magnetic field B</div>
+    <div class="legend-item"><span class="legend-line" style="background:#66f0a5"></span>Poynting vector S</div>
+    <div class="legend-item"><span class="legend-line" style="background:#a09aff"></span>Propagation</div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>Wave controls</h2><p>Changes apply immediately</p></div>
+    <span class="badge">LIVE</span>
+  </div>
+
+  <div class="controls">
+
+    <div class="mode-box">
+      <div class="mode-row">
+        <input type="checkbox" id="physicsMode">
+        <label for="physicsMode">Physics Mode — enforce fλ = c</label>
+      </div>
+      <p id="modeDescription">Exploration Mode: adjust wavelength and frequency independently.</p>
+    </div>
+
+    <div class="control-group">
+      <div class="control-title"><label for="wavelength">Wavelength λ</label><span class="value" id="lambdaValue"></span></div>
+      <input id="wavelength" type="range" min="0.5" max="5" step="0.05" value="2">
+      <div class="range-ends"><span>0.5 m</span><span>5 m</span></div>
+    </div>
+
+    <div class="control-group">
+      <div class="control-title"><label for="frequency">Frequency f</label><span class="value" id="frequencyValue"></span></div>
+      <input id="frequency" type="range" min="0.2" max="3" step="0.05" value="1">
+      <div class="range-ends"><span>0.2 Hz</span><span>3 Hz</span></div>
+    </div>
+
+    <div class="control-group">
+      <div class="control-title"><label for="amplitude">Electric amplitude E₀</label><span class="value" id="amplitudeValue"></span></div>
+      <input id="amplitude" type="range" min="10" max="300" step="5" value="100">
+      <div class="range-ends"><span>10 V/m</span><span>300 V/m</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="direction-grid">
+      <div>
+        <label class="select-label" for="propagation">Wave propagation</label>
+        <select id="propagation">
+          <option value="z+">+Z direction</option>
+          <option value="z-">−Z direction</option>
+          <option value="x+">+X direction</option>
+          <option value="x-">−X direction</option>
+          <option value="y+">+Y direction</option>
+          <option value="y-">−Y direction</option>
+        </select>
+      </div>
+      <div>
+        <label class="select-label" for="electricDirection">Electric field direction</label>
+        <select id="electricDirection">
+          <option value="x+">+X direction</option>
+          <option value="x-">−X direction</option>
+          <option value="y+">+Y direction</option>
+          <option value="y-">−Y direction</option>
+          <option value="z+">+Z direction</option>
+          <option value="z-">−Z direction</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="select-label" for="polarization">Polarization</label>
+      <select id="polarization">
+        <option value="linear">Linear</option>
+        <option value="circular">Circular</option>
+        <option value="elliptical">Elliptical</option>
+      </select>
+    </div>
+
+    <div class="buttons">
+      <button class="primary" id="playPause" type="button">❚❚ Pause animation</button>
+      <button id="reset" type="button">Reset</button>
+    </div>
+    <div id="message" aria-live="polite"></div>
+  </div>
+</section>
+
+</div>
+
+<section class="metrics">
+  <div class="metric"><div class="metric-label">Wavelength</div><div class="metric-value" id="metricLambda">2.00</div><div class="metric-unit">metres</div></div>
+  <div class="metric"><div class="metric-label">Frequency</div><div class="metric-value" id="metricFrequency">1.00</div><div class="metric-unit" id="frequencyUnit">hertz</div></div>
+  <div class="metric"><div class="metric-label">Magnetic amplitude</div><div class="metric-value" id="metricB">0.334</div><div class="metric-unit">microtesla (μT)</div></div>
+  <div class="metric"><div class="metric-label">Wave speed</div><div class="metric-value" id="metricSpeed">2.00</div><div class="metric-unit" id="speedUnit">m/s · exploration</div></div>
+</section>
+
+<div class="lower-grid">
+
+<section class="panel info">
+  <h2>Wave equations</h2>
+  <div class="equation"><small>Wavenumber</small>k = 2π / λ</div>
+  <div class="equation"><small>Angular frequency</small>ω = 2πf</div>
+  <div class="equation"><small>Wave phase</small>φ = kz − ωt</div>
+  <div class="equation"><small>Magnetic field amplitude</small>B₀ = E₀ / c</div>
+  <div class="equation"><small>Wave speed</small>v = fλ</div>
+  <p class="note">In Physics Mode, frequency is calculated from wavelength using the vacuum speed of light. Animation is deliberately slowed so the wave remains visible.</p>
+</section>
+
+<section class="panel info">
+  <h2>Energy propagation</h2>
+  <div class="equation"><small>Poynting vector</small>S = (1/μ₀)(E × B)</div>
+  <div id="directionSummary"></div>
+  <div class="divider"></div>
+  <p class="note">The green arrow represents the direction of electromagnetic energy flow. For a plane wave in vacuum, the Poynting vector points along the propagation direction.</p>
+  <p class="note">The displayed field sizes are normalized for visibility. Numerical field amplitudes are calculated separately.</p>
+</section>
+
+</div>
+
+<footer>
+  Interactive educational model · Electromagnetic waves in free space<br>
+  Physics Mode enforces the vacuum dispersion relation fλ = c.
+</footer>
+
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const $ = id => document.getElementById(id);
+const container = $("scene");
+const C = 299792458;
+
+let running = true;
+let elapsed = 0;
+let previousTime = performance.now();
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+
+const camera = new THREE.PerspectiveCamera(
+  45, container.clientWidth / container.clientHeight, 0.1, 1000
+);
+camera.position.set(7.5, 6.5, 10);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.target.set(0,0,0);
+
+scene.add(new THREE.AmbientLight(0xffffff,1.4));
+const light = new THREE.DirectionalLight(0xffffff,1.5);
+light.position.set(5,8,6);
+scene.add(light);
+
+const grid = new THREE.GridHelper(12,24,0x354761,0x1e2b40);
+grid.position.y = -2.5;
+scene.add(grid);
+scene.add(new THREE.AxesHelper(2.3));
+
+function makeLabel(text,color) {
+  const canvas = document.createElement("canvas");
+  canvas.width=256;
+  canvas.height=80;
+  const ctx=canvas.getContext("2d");
+  ctx.font="bold 44px Arial";
+  ctx.fillStyle=color;
+  ctx.fillText(text,10,55);
+  const texture=new THREE.CanvasTexture(canvas);
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:texture,transparent:true,depthTest:false
+  }));
+  sprite.scale.set(1.3,.4,1);
+  return sprite;
+}
+
+const lx=makeLabel("X","#ff7373");
+lx.position.set(2.6,0,0); scene.add(lx);
+const ly=makeLabel("Y","#7effa1");
+ly.position.set(0,2.6,0); scene.add(ly);
+const lz=makeLabel("Z","#a09aff");
+lz.position.set(0,0,2.6); scene.add(lz);
+
+const COUNT=200;
+const LENGTH=9;
+
+function createCurve(color) {
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(COUNT*3),3));
+  const line=new THREE.Line(geometry,new THREE.LineBasicMaterial({color,transparent:true,opacity:.98}));
+  scene.add(line);
+  return line;
+}
+
+const eCurve=createCurve(0x42d9ff);
+const bCurve=createCurve(0xffad61);
+
+const propagationLine=new THREE.Line(
+  new THREE.BufferGeometry(),
+  new THREE.LineBasicMaterial({color:0xa09aff})
+);
+scene.add(propagationLine);
+
+const propagationArrow=new THREE.ArrowHelper(
+  new THREE.Vector3(0,0,1),new THREE.Vector3(),1.1,0xa09aff,.3,.17
+);
+scene.add(propagationArrow);
+
+// Poynting vector: a green arrow pointing in the direction E × B.
+const poyntingArrow=new THREE.ArrowHelper(
+  new THREE.Vector3(0,0,1),new THREE.Vector3(),1.35,0x66f0a5,.32,.18
+);
+scene.add(poyntingArrow);
+
+const fieldArrows=[];
+for(let i=0;i<9;i++){
+  const e=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),.5,0x42d9ff,.18,.1);
+  const b=new THREE.ArrowHelper(new THREE.Vector3(0,1,0),new THREE.Vector3(),.5,0xffad61,.18,.1);
+  scene.add(e,b);
+  fieldArrows.push({e,b});
+}
+
+const D={
+ "x+":new THREE.Vector3(1,0,0),"x-":new THREE.Vector3(-1,0,0),
+ "y+":new THREE.Vector3(0,1,0),"y-":new THREE.Vector3(0,-1,0),
+ "z+":new THREE.Vector3(0,0,1),"z-":new THREE.Vector3(0,0,-1)
+};
+
+const DNAME={
+ "x+":"+X","x-":"−X","y+":"+Y","y-":"−Y","z+":"+Z","z-":"−Z"
+};
+
+let kHat=D["z+"].clone();
+let eHat=D["x+"].clone();
+let uHat=eHat.clone();
+let vHat=new THREE.Vector3(0,1,0);
+
+function physicsMode(){
+  return $("physicsMode").checked;
+}
+
+function readValues(){
+  const lambda=Number($("wavelength").value);
+  let frequency=Number($("frequency").value);
+
+  if(physicsMode()){
+    frequency=C/lambda;
+  }
+
+  return {
+    lambda,
+    frequency,
+    amplitude:Number($("amplitude").value),
+    polarization:$("polarization").value
+  };
+}
+
+function formatFrequency(f){
+  if(f>=1e9) return (f/1e9).toFixed(3)+" GHz";
+  if(f>=1e6) return (f/1e6).toFixed(3)+" MHz";
+  if(f>=1e3) return (f/1e3).toFixed(3)+" kHz";
+  return f.toFixed(2)+" Hz";
+}
+
+function choosePerpendicularElectric(){
+  for(const key of ["x+","y+","z+"]){
+    if(Math.abs(D[key].dot(kHat))<.001) return D[key].clone();
+  }
+  return D["x+"].clone();
+}
+
+function updateDirections(){
+  kHat=D[$("propagation").value].clone();
+  eHat=D[$("electricDirection").value].clone();
+
+  if(Math.abs(kHat.dot(eHat))>.001){
+    eHat=choosePerpendicularElectric();
+    const key=Object.keys(D).find(key=>D[key].equals(eHat));
+    $("electricDirection").value=key;
+    $("message").textContent=
+      "E must be perpendicular to propagation. A valid direction was selected automatically.";
+  }else{
+    $("message").textContent="";
+  }
+
+  uHat=eHat.clone().normalize();
+  vHat=new THREE.Vector3().crossVectors(kHat,uHat).normalize();
+
+  const bDirection=new THREE.Vector3().crossVectors(kHat,uHat).normalize();
+
+  $("directionSummary").innerHTML=
+    "<b>Propagation:</b> "+DNAME[$("propagation").value]+"<br>"+
+    "<b>Electric reference:</b> "+vectorName(uHat)+"<br>"+
+    "<b>Magnetic reference:</b> "+vectorName(bDirection)+"<br>"+
+    "<b>Poynting vector:</b> "+DNAME[$("propagation").value]+"<br>"+
+    "<b>Relationship:</b> S ∝ E × B";
+
+  updatePropagationArrow();
+  poyntingArrow.setDirection(kHat.clone());
+}
+
+function vectorName(v){
+  const axes=[
+    ["+X",v.x],["−X",-v.x],["+Y",v.y],["−Y",-v.y],["+Z",v.z],["−Z",-v.z]
+  ];
+  axes.sort((a,b)=>b[1]-a[1]);
+  return axes[0][0];
+}
+
+function updatePropagationArrow(){
+  propagationLine.geometry.dispose();
+  propagationLine.geometry=new THREE.BufferGeometry().setFromPoints([
+    kHat.clone().multiplyScalar(-5.5),
+    kHat.clone().multiplyScalar(5.5)
+  ]);
+  propagationArrow.position.copy(kHat.clone().multiplyScalar(4));
+  propagationArrow.setDirection(kHat);
+  propagationArrow.setLength(1.1,.3,.17);
+
+  poyntingArrow.position.copy(kHat.clone().multiplyScalar(2.8));
+  poyntingArrow.setDirection(kHat);
+  poyntingArrow.setLength(1.35,.32,.18);
+}
+
+function sampleWave(position,time,values){
+  const k=2*Math.PI/values.lambda;
+  const omega=2*Math.PI*values.frequency;
+
+  // In Physics Mode, slow down time for visualization without changing
+  // the displayed physical wavelength or frequency.
+  const timeScale=physicsMode()?1e-8:1;
+  const phase=k*position-omega*time*timeScale;
+
+  let u=Math.sin(phase);
+  let v=0;
+
+  if(values.polarization==="circular") v=Math.cos(phase);
+  if(values.polarization==="elliptical") v=.5*Math.cos(phase);
+
+  const E=uHat.clone().multiplyScalar(u).add(vHat.clone().multiplyScalar(v));
+
+  // B ∝ k × E, so E × B points in the propagation direction.
+  const B=new THREE.Vector3().crossVectors(kHat,E);
+
+  return {E,B};
+}
+
+function displayPoint(position,vector){
+  // Both E and B curves share the same propagation axis.
+  return kHat.clone().multiplyScalar(position).add(vector.clone().multiplyScalar(1.5));
+}
+
+function updateLine(line,points){
+  const array=line.geometry.attributes.position.array;
+  for(let i=0;i<points.length;i++){
+    array[3*i]=points[i].x;
+    array[3*i+1]=points[i].y;
+    array[3*i+2]=points[i].z;
+  }
+  line.geometry.attributes.position.needsUpdate=true;
+  line.geometry.computeBoundingSphere();
+}
+
+function updateMetrics(values){
+  $("lambdaValue").textContent=values.lambda.toFixed(2)+" m";
+  $("frequencyValue").textContent=formatFrequency(values.frequency);
+  $("amplitudeValue").textContent=values.amplitude.toFixed(0)+" V/m";
+
+  $("metricLambda").textContent=values.lambda.toFixed(2);
+  $("metricFrequency").textContent=formatFrequency(values.frequency);
+  $("frequencyUnit").textContent=physicsMode()?"derived from c/λ":"selected frequency";
+
+  $("metricB").textContent=(values.amplitude/C*1e6).toFixed(3);
+  $("metricSpeed").textContent=physicsMode()
+    ?"2.998×10⁸"
+    :(values.lambda*values.frequency).toFixed(2);
+
+  $("speedUnit").textContent=physicsMode()?"m/s · vacuum":"m/s · exploration";
+  $("frequency").disabled=physicsMode();
+
+  $("modeDescription").textContent=physicsMode()
+    ?"Physics Mode: f is calculated from c/λ. The animation is slowed for visibility."
+    :"Exploration Mode: adjust wavelength and frequency independently.";
+}
+
+function updateWave(){
+  const values=readValues();
+  const ePoints=[];
+  const bPoints=[];
+
+  for(let i=0;i<COUNT;i++){
+    const pos=(i/(COUNT-1)-.5)*LENGTH;
+    const {E,B}=sampleWave(pos,elapsed,values);
+    ePoints.push(displayPoint(pos,E));
+    bPoints.push(displayPoint(pos,B));
+  }
+
+  updateLine(eCurve,ePoints);
+  updateLine(bCurve,bPoints);
+
+  for(let i=0;i<fieldArrows.length;i++){
+    const pos=(i/(fieldArrows.length-1)-.5)*LENGTH;
+    const {E,B}=sampleWave(pos,elapsed,values);
+    const origin=kHat.clone().multiplyScalar(pos);
+
+    if(E.length()>.001){
+      fieldArrows[i].e.position.copy(origin);
+      fieldArrows[i].e.setDirection(E.clone().normalize());
+      fieldArrows[i].e.setLength(Math.max(.08,E.length()*.8),.18,.1);
+    }
+
+    if(B.length()>.001){
+      fieldArrows[i].b.position.copy(origin);
+      fieldArrows[i].b.setDirection(B.clone().normalize());
+      fieldArrows[i].b.setLength(Math.max(.08,B.length()*.8),.18,.1);
+    }
+  }
+
+  updateMetrics(values);
+}
+
+function resizeRenderer(){
+  const width=container.clientWidth;
+  const height=container.clientHeight;
+  if(!width||!height)return;
+
+  camera.aspect=width/height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width,height,false);
+}
+
+function animate(now){
+  requestAnimationFrame(animate);
+  const dt=Math.min((now-previousTime)/1000,.05);
+  previousTime=now;
+
+  if(running)elapsed+=dt;
+
+  updateWave();
+  controls.update();
+  renderer.render(scene,camera);
+}
+
+["wavelength","frequency","amplitude","polarization"].forEach(id=>{
+  $(id).addEventListener("input",updateWave);
+  $(id).addEventListener("change",updateWave);
+});
+
+$("physicsMode").addEventListener("change",()=>{
+  updateWave();
+});
+
+$("propagation").addEventListener("change",()=>{
+  updateDirections();
+  updateWave();
+});
+
+$("electricDirection").addEventListener("change",()=>{
+  updateDirections();
+  updateWave();
+});
+
+$("playPause").addEventListener("click",()=>{
+  running=!running;
+  $("playPause").textContent=running?"❚❚ Pause animation":"▶ Resume animation";
+  $("statusText").textContent=running?"ANIMATION RUNNING":"ANIMATION PAUSED";
+  $("statusDot").style.background=running?"#49e59b":"#ffbd61";
+  $("statusDot").style.boxShadow=running?"0 0 12px #49e59b88":"none";
+});
+
+$("reset").addEventListener("click",()=>{
+  $("wavelength").value=2;
+  $("frequency").value=1;
+  $("amplitude").value=100;
+  $("propagation").value="z+";
+  $("electricDirection").value="x+";
+  $("polarization").value="linear";
+  $("physicsMode").checked=false;
+
+  elapsed=0;
+  running=true;
+
+  $("playPause").textContent="❚❚ Pause animation";
+  $("statusText").textContent="ANIMATION RUNNING";
+  $("statusDot").style.background="#49e59b";
+  $("statusDot").style.boxShadow="0 0 12px #49e59b88";
+
+  updateDirections();
+  updateWave();
+});
+
+if("ResizeObserver" in window){
+  new ResizeObserver(resizeRenderer).observe(container);
+}else{
+  window.addEventListener("resize",resizeRenderer);
+}
+
+updateDirections();
+updateWave();
+requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>
